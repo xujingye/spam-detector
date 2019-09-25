@@ -1,0 +1,155 @@
+%%%%%%% email parsing
+function parameterMatrix = FilterTraining(source)
+parameterMatrix = zeros(57,4);
+d = size(source);
+
+% block for find # of spam vs non spam
+numberofSpam = 0;
+
+numberofNonSpam = 0;
+for i = 1 : d(1)
+    if source(i,58) == 1
+        numberofSpam = numberofSpam + 1;
+    else
+        numberofNonSpam = numberofNonSpam + 1;
+    end
+end
+
+disp("the number of numberofSpam is " + numberofSpam);
+disp("the number of nonnumberofSpam is " + numberofNonSpam);
+
+% for average of spam
+for i = 1 : 57
+    sum = 0;
+    for j = 1 : d(1)
+        if source(j,58) == 1 % this is spam
+            sum = sum + source(j,i);
+        end
+    end
+    disp("the " + i + "th" +" sum is :" + sum);
+    parameterMatrix(i,1) = sum/(numberofSpam);
+end
+
+% for variance of spam
+for i = 1 : 57
+    sum = 0;
+    average = parameterMatrix(i,1);
+    for j = 1 : d(1)
+        if source(j,58) == 1 % this is spam
+            sum = sum + (source(j,i) - average)^2 ;
+        end
+    end
+    parameterMatrix(i,2) = sum/(numberofSpam);
+end
+
+% for average of non-spam
+for i = 1 : 57
+    sum = 0;
+    for j = 1 : d(1)
+        if source(j,58) == 0 % this is non spam
+            sum = sum + source(j,i);
+        end
+    end
+    parameterMatrix(i,3) = sum/(numberofNonSpam);
+end
+
+% for variance of non-spam
+for i = 1 : 57
+    sum = 0;
+    average = parameterMatrix(i,3);
+    for j = 1 : d(1)
+        if source(j,58) == 0 % this is non spam
+            sum = sum + (source(j,i) - average)^2 ;
+        end
+    end
+    parameterMatrix(i,4) = sum/(numberofNonSpam);
+end
+%%%%%%%%%%
+
+
+%%%%%%%% training part
+function parameterMatrix = FilterTraining(source)
+parameterMatrix = zeros(57,4);
+d = size(source);
+
+% block for find # of spam vs non spam
+numberofSpam = 0;
+
+numberofNonSpam = 0;
+for i = 1 : d(1)
+    if source(i,58) == 1
+        numberofSpam = numberofSpam + 1;
+    else
+        numberofNonSpam = numberofNonSpam + 1;
+    end
+end
+
+disp("the number of numberofSpam is " + numberofSpam);
+disp("the number of nonnumberofSpam is " + numberofNonSpam);
+
+% for average of spam
+for i = 1 : 57
+    sum = 0;
+    for j = 1 : d(1)
+        if source(j,58) == 1 % this is spam
+            sum = sum + source(j,i);
+        end
+    end
+    disp("the " + i + "th" +" sum is :" + sum);
+    parameterMatrix(i,1) = sum/(numberofSpam);
+end
+
+% for variance of spam
+for i = 1 : 57
+    sum = 0;
+    average = parameterMatrix(i,1);
+    for j = 1 : d(1)
+        if source(j,58) == 1 % this is spam
+            sum = sum + (source(j,i) - average)^2 ;
+        end
+    end
+    parameterMatrix(i,2) = sum/(numberofSpam);
+end
+
+% for average of non-spam
+for i = 1 : 57
+    sum = 0;
+    for j = 1 : d(1)
+        if source(j,58) == 0 % this is non spam
+            sum = sum + source(j,i);
+        end
+    end
+    parameterMatrix(i,3) = sum/(numberofNonSpam);
+end
+
+% for variance of non-spam
+for i = 1 : 57
+    sum = 0;
+    average = parameterMatrix(i,3);
+    for j = 1 : d(1)
+        if source(j,58) == 0 % this is non spam
+            sum = sum + (source(j,i) - average)^2 ;
+        end
+    end
+    parameterMatrix(i,4) = sum/(numberofNonSpam);
+end
+%%%%%%%%%%%%%%
+
+%%%%%%% predict part
+function spamorNot = prediction(emailParseVector, parameterMatrix)
+
+spamPro = 0;
+nonspamPro = 0;
+for i = 1 : 57
+    spamEng = truncate(makedist('Normal','mu',parameterMatrix(i,1),'sigma',parameterMatrix(i,2)),0,inf);
+    nospamEng = truncate(makedist('Normal','mu',parameterMatrix(i,3),'sigma',parameterMatrix(i,4)),0,inf);
+    spamPro = spamPro + log(pdf(spamEng,emailParseVector(i)));
+    nonspamPro = nonspamPro + log(pdf(nospamEng,emailParseVector(i)));
+end
+disp(spamPro + " vs " + nonspamPro);
+if spamPro > nonspamPro
+    spamorNot = "this is a spam";
+else 
+    spamorNot = "this is no a spam";
+end
+
